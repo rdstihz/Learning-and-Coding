@@ -2,113 +2,76 @@
 
 using namespace std;
 
-struct Mem {
-    int head, len;
-    Mem(int head, int len) : head(head), len(len) {}
-    bool operator<(const Mem& phs) const {
-        if(head == phs.head) return len < phs.len;
-        return head < phs.head;
-    }
-};
-struct Exec {
-    int head, len;
-    int endtime;
-    Exec(int head, int len, int endtime) : head(head), len(len), endtime(endtime) {}
-    bool operator<(const Exec& phs) const {
-        return endtime < phs.endtime;
-    }
-};
-struct Prog {
-    int len;
-    int T;
-    Prog(int len, int T) : len(len), T(T) {}
-};
+typedef pair<int, int> PII;
 
-set<Mem> buff; // 内在缓冲池
-set<Exec> run; //运行中
-queue<Prog> Q; //队列
-
-const int maxn = 10000 + 10;
-int t[maxn], m[maxn], p[maxn];
-int n;
 int N;
+int t, m, p;
 
-void mergeInsert(Mem temp) {
+queue<PII> waits;                                     // 内存 ， 时间
+set<PII> runs;                                        // 正在运行, 首地址，长度
+priority_queue<PII, vector<PII>, greater<PII>> endts; //结束时间，内存地址
 
-    Mem a(0, 0);
-    Mem b(0, 0);
+int ans, cnt;
 
-    for (auto it = buff.begin(); it != buff.end(); it++) {
-        if (it->head + it->len == temp.head) {
-            temp.head = it->head;
-            temp.len += it->len;
-            a = *it;
-        } else if (temp.head + temp.len == it->head) {
-            temp.len += it->len;
-            b = *it;
+bool work(int t, int m, int p) {
+
+    for (auto it = runs.begin(); it != runs.end(); it++) {
+        auto jt = it;
+        jt++;
+
+        if(jt == runs.end()) break;
+        
+        int start = it->first + it -> second;
+        if(m <= jt->first - start) {
+            runs.insert(make_pair( start,m));
+            endts.push(make_pair(t + p,start));
+            return true;
         }
-    }
-    if (a.len) buff.erase(a);
-    if (b.len) buff.erase(b);
 
-    buff.insert(temp);
+    }
+
+    return false;
 }
 
-bool work(Prog temp, int curT) {
-    auto it = buff.begin();
-    while (it != buff.end() && it->len < temp.len)
-        it++;
-    if (it == buff.end()) return false;
+void finish(int t) {
 
-    int head = it->head;
-    int len = it->len;
-    buff.erase(it);
-    run.insert(Exec(head, temp.len, curT + temp.T));
-    if (len > temp.len) {
-        buff.insert(Mem(head + temp.len, len - temp.len));
+    while (endts.size() && endts.top().first <= t) {
+        int f = endts.top().first;
+        ans = f;
+        while (endts.size() && endts.top().first == f) {
+            auto it = runs.lower_bound(make_pair(endts.top().second, 0));
+            runs.erase(it);
+            endts.pop();
+        }
+
+        while (waits.size()) {
+            if (work(f, waits.front().first, waits.front().second)) {
+                waits.pop();
+            } else {
+                break;
+            }
+        }
     }
-    return true;
 }
 
 int main() {
+
     cin >> N;
-    n = 0;
-    while (++n) {
-        cin >> t[n] >> m[n] >> p[n];
-        if (!(t[n] || m[n] || p[n] )) break;
-    }
-    n--;
-    buff.insert(Mem(0, N));
+    runs.insert(make_pair(-1, 1));
+    runs.insert(make_pair(N, 1));
 
-    int T = -1;
-    int i = 1;
-    int cnt = 0;
-    while (i <= n || Q.size() || run.size()) {
-        T++;
-
-        //1.释放运行结束的程序
-        while (run.size() && run.begin()->endtime == T) {
-            Mem temp(run.begin()->head, run.begin()->len);
-            mergeInsert(temp);
-            run.erase(run.begin());
-        }
-
-        //2.处理队列中的程序
-        while (Q.size()) {
-            if (!work(Q.front(), T)) break;
-            Q.pop();
-        }
-
-        //3.处理后续程序
-        while (i <= n && t[i] == T) {
-            if (!work(Prog(m[i], p[i]), T)) {
-                Q.push(Prog(m[i], p[i]));
-                cnt++;
-            }
-            i++;
+    while (cin >> t >> m >> p, t || m || p) {
+        finish(t);
+        if (!work(t, m, p)) {
+            cnt++;
+            waits.push(make_pair(m, p));
         }
     }
-    cout << T << endl;
+
+    finish(2e9);
+
+    cout << ans << endl;
     cout << cnt << endl;
+
     return 0;
 }
