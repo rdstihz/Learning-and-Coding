@@ -4,7 +4,7 @@
 const int maxn = 100000 + 100;
 int a[maxn];
 
-//¿ìËÙÅÅĞò 
+//å¿«é€Ÿæ’åº 
 void sort(int l,int r){
 	if(l>=r) return;
 	
@@ -27,8 +27,8 @@ void sort(int l,int r){
 }
 
 
-//¶ş·Ö²éÕÒ
-//ÏÂ½ç,ÔÚa[l...r]²éÕÒµÚÒ»¸ö´óÓÚµÈÓÚvalueµÄÊı 
+//äºŒåˆ†æŸ¥æ‰¾
+//ä¸‹ç•Œ,åœ¨a[l...r]æŸ¥æ‰¾ç¬¬ä¸€ä¸ªå¤§äºç­‰äºvalueçš„æ•° 
 int lower_bound(int l,int r,int value){
 	int m;
 	
@@ -41,7 +41,7 @@ int lower_bound(int l,int r,int value){
 	return l;
 } 
 
-//ÉÏ½ç,ÔÚa[l...r]²éÕÒµÚÒ»¸ö´óÓÚvalueµÄÊı 
+//ä¸Šç•Œ,åœ¨a[l...r]æŸ¥æ‰¾ç¬¬ä¸€ä¸ªå¤§äºvalueçš„æ•° 
 
 int upper_bound(int l,int r,int value){
 	int m;
@@ -58,7 +58,7 @@ int main(){
 	scanf("%d",&n);
 	for(int i = 1;i<=n;i++)	scanf("%d",a+i);
 	
-	//ÅÅĞò 
+	//æ’åº 
 	sort(1,n);
 	
 	for(int i = 1;i<=n;i++) printf("%d ",a[i]);

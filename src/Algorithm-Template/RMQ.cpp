@@ -18,7 +18,7 @@ int main(){
 	
 	for(int i = 1;i<=n;i++) scanf("%d",&st[i][0]);
 	
-	//Ô¤´¦ÀíST±í
+
 	for(int k = 1;k<=N;k++)
 		for(int i = 1;i+(1<<k)-1 <=n; i++)
 			st[i][k] = min(st[i][k-1],st[i+(1<<k-1)][k-1]); 
