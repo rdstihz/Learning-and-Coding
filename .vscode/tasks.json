@@ -10,7 +10,7 @@
 				"${file}",
 				"-std=c++11",
 				"-o",
-				"${workspaceFolder}/bin/${fileBasenameNoExtension}"
+				"${workspaceFolder}/bin/exe"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"
