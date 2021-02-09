@@ -1,89 +1,128 @@
 #include <cstdio>
-#include <cstring>
-#include <algorithm>
 #include <queue>
+#include <cstring>
 
 using namespace std;
 
 const int maxn = 505;
+const int INF = 0x3f3f3f3f;
+const int dx[] = {-1, 0, 1, 0};
+const int dy[] = {0, 1, 0, -1};
+const char dir[] = "urdl";
+
+int n, m;
 char str[maxn][maxn];
 
-int target_x, target_y;
-
 struct State {
-    int x1, y1;
-    int x2, y2;
-    int s; // 0 立 ， 1 躺
-    int d; //距离
-    
-};
-State start;
+    int x, y;
+    int d;
+} start, target;
 
-const int dx[] = {0, 1, 0, -1};
-const int dy[] = {1, 0, -1, 0};
-
-int n,m;
-
-inline bool legal(int x,int y) {
-    return x>= 0 && x < n && y >= 0 && y < m && str[x][y] != '#';
+inline bool legal(int x, int y) {
+    return x >= 1 && x <= n && y >= 1 && y <= m && (str[x][y] == '.' || str[x][y] == 'E');
+}
+inline bool legal2(int x, int y) {
+    return x >= 1 && x <= n && y >= 1 && y <= m && str[x][y] == '.';
 }
 
+int dist[maxn][maxn][5];
+
+bool solve() {
+    memset(dist, 0x3f, sizeof(dist));
+    dist[start.x][start.y][start.d] = 0;
+
+    queue<State> Q;
+    Q.push(start);
+
+    while (Q.size()) {
+        State node = Q.front();
+        Q.pop();
+
+        if (node.d == 4) {
+            //立着的
+            for (int i = 0; i < 4; i++) {
+                int xx = node.x + dx[i];
+                int yy = node.y + dy[i];
+
+                if (legal(xx, yy) && legal(xx + dx[i], yy + dy[i])) {
+                    if (dist[xx][yy][i] == INF) {
+                        dist[xx][yy][i] = dist[node.x][node.y][node.d] + 1;
+                        Q.push({xx, yy, i});
+                    }
+                }
+            }
+        } else {
+            int xx, yy;
+            for (int i = 0; i < 4; i++) {
+                if (i == node.d) {
+                    xx = node.x + 2 * dx[i];
+                    yy = node.y + 2 * dy[i];
+                    if (legal2(xx, yy) && dist[xx][yy][4] == INF) {
+                        dist[xx][yy][4] = dist[node.x][node.y][node.d] + 1;
+                        Q.push({xx, yy, 4});
+                    }
+                } else if (i - node.d == 2 || node.d - i == 2) {
+                    xx = node.x + dx[i];
+                    yy = node.y + dy[i];
+                    if (legal2(xx, yy) && dist[xx][yy][4] == INF) {
+                        dist[xx][yy][4] = dist[node.x][node.y][node.d] + 1;
+                        Q.push({xx, yy, 4});
+                    }
+                } else {
+                    xx = node.x + dx[i];
+                    yy = node.y + dy[i];
+
+                    if (legal(xx, yy) && legal(xx + dx[node.d], yy + dy[node.d])) {
+                        if (dist[xx][yy][node.d] == INF) {
+                            dist[xx][yy][node.d] = dist[node.x][node.y][node.d] + 1;
+                            Q.push({xx, yy, node.d});
+                        }
+                    }
+                }
+            }
+        }
+
+        if (dist[target.x][target.y][target.d] != INF) return true;
+    }
+
+    return false;
+}
 
 int main() {
 
     while (scanf("%d%d", &n, &m), n) {
-        for (int i = 0; i < n; i++) {
-            scanf("%s", str[i]);
-        }
-        start.s = -1;
+        
+        
+        
+        for (int i = 1; i <= n; i++)
+            scanf("%s", str[i] + 1);
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                if (str[i][j] == 'O') { //目标
-                    target_x = i;
-                    target_y = j;
-                } else if (str[i][j] == 'X') { //起点
-                    start.s++;
-                    if (start.s == 0) {
-                        start.x1 = i;
-                        start.y1 = j;
-                    } else if (start.s == 1) {
-                        start.x2 = i;
-                        start.y2 = j;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++) {
+                if (str[i][j] == 'O') {
+                    target.x = i;
+                    target.y = j;
+                    target.d = 4;
+                    str[i][j] = '.';
+                } else if (str[i][j] == 'X') {
+                    start.x = i;
+                    start.y = j;
+                    start.d = 4;
+
+                    for (int k = 0; k < 4; k++) {
+                        if (str[i + dx[k]][j + dy[k]] == 'X') {
+                            start.d = k;
+                            str[i + dx[k]][j + dy[k]] = '.';
+                        }
                     }
-                }
-            }
-        start.d = 0;
-        queue<State> Q;
-        Q.push(start);
-
-        while (Q.size()) {
-            State S = Q.front();
-            Q.pop();
-
-            if (S.s == 0) {                                 //立
-                if (S.x1 == target_x && S.y1 == target_y) { //到达终点
-                    printf("%d\n", S.d);
-                    break;
-                }
-
-                for (int i = 0; i < 4; i++) {
-                    int x1 = S.x1 + dx[i];
-                    int x2 = x1 + dx[i];
-                    int y1 = S.y1 + dy[i];
-                    int y2 = y1 + dy[i];
-
-                    if (legal(x1, y1) && legal(x2, y2)) {
-                        Q.push(State{x1, y1, x2, y2, 0, S.d + 1});
-                    }
+                    str[i][j] = '.';
                 }
             }
 
-            if(S.s == 1) {
-
-                
-            }
-
+        if (solve()) {
+            printf("%d\n", dist[target.x][target.y][target.d]);
+        } else {
+            printf("Impossible\n");
         }
     }
 
