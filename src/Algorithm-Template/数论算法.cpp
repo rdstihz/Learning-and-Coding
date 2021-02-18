@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+typedef long long LL;
 
 //GCD: 欧几里德算法，计算a,b的最大公约数,复杂度O(log(a + b))
 int gcd(int a, int b) {
@@ -97,10 +98,42 @@ int exgcd(int a, int b, int& x, int& y) {
     }
 }
 
+//Baby Step, Giant Step算法:
+//求解不定方程 a^x = b (mod p)
+
+LL bsgs(LL a, LL b, LL p) {
+    unordered_map<LL, LL> hash;
+    hash.clear();
+    LL t = sqrt(p - 1) + 1;
+
+    b %= p;
+    LL x = 1;
+    for (LL j = 0; j < t; j++) {
+        LL val = b * x % p;
+        hash[val] = j;
+        x = x * a % p;
+    }
+    a = x;
+    x = 1;
+    for (LL i = 0; i <= t; i++) {
+        if (hash.count(x)) {
+            int r = i * t - hash[x];
+            if (r >= 0)
+                return r;
+        }
+        x = x * a % p;
+    }
+    return -1;
+}
+
 int main() {
-    int a, b;
-    cin >> a >> b;
-    int x, y;
-    int d = exgcd(a, b, x, y);
-    cout << d << " " << x << " " << y << endl;
+    LL a, b, p;
+
+    while(cin >> p >> a >> b) {
+        LL x = bsgs(a,b,p);
+        if(x == -1)
+            cout << "no solution" << endl;
+        else
+            cout << x << endl;
+    }
 }
