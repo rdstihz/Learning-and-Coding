@@ -50,7 +50,7 @@ void divide_prod(int n) {
 }
 
 //计算欧拉函数
-int phi(int n) {
+int get_euler(int n) {
     int ans = n;
     for (int i = 2; i <= sqrt(n); i++) {
         if (n % i == 0)
@@ -58,14 +58,49 @@ int phi(int n) {
         while (n % i == 0)
             n /= i;
     }
-    if(n > 1)
+    if (n > 1)
         ans = ans / n * (n - 1);
     return ans;
 }
 
+//线性筛积性函数 （欧拉函数）
+int phi[N + 10];
+void get_euler() {
+    flag[1] = true;
+    for (int i = 2; i <= N; i++) {
+        if (!flag[i]) {
+            prime[++tot] = i;
+            phi[i] = i - 1;
+        }
+        for (int j = 1; j <= tot && i * prime[j] <= N; j++) {
+            flag[i * prime[j]] = true;
+            if (i % prime[j] == 0) {
+                phi[i * prime[j]] = phi[i] * prime[j];
+                break;
+            } else {
+                phi[i * prime[j]] = phi[i] * (prime[j] - 1);
+            }
+        }
+    }
+}
+
+//扩展欧几里得算法 exgcd
+//求方程 ax + by = gcd(a,b) 的一组解(x0,y0)
+int exgcd(int a, int b, int& x, int& y) {
+    if (b == 0) {
+        x = 1, y = 0;
+        return a;
+    } else {
+        int d = exgcd(b, a % b, y, x);
+        y -= x * (a / b);
+        return d;
+    }
+}
+
 int main() {
-    get_primes();
-    for (int i = 1; i <= 20; i++)
-        cout << prime[i] << " ";
-    cout << endl;
+    int a, b;
+    cin >> a >> b;
+    int x, y;
+    int d = exgcd(a, b, x, y);
+    cout << d << " " << x << " " << y << endl;
 }
