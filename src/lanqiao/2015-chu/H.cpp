@@ -1,92 +1,127 @@
-#include <cstring>
+#include <algorithm>
 #include <iostream>
+#include <vector>
 
 using namespace std;
-typedef long long LL;
-const int N = 6;
-const LL P = 1e9 + 7;
 
-struct Matrix {
-    int n, m;
-    LL d[N][N];
-    Matrix(int n, int m) {
-        this->n = n;
-        this->m = m;
-        memset(d, 0, sizeof(d));
+const int maxn = 50000 + 100;
+const int maxm = 200000 + 20;
+
+struct Edge {
+    int u, v, w;
+    bool operator<(const Edge& phs) const {
+        return w < phs.w;
     }
-};
+} edge[maxm];
 
-Matrix operator*(const Matrix& A, const Matrix& B) {
-    int n = A.n, m = A.m, l = B.m;
-    Matrix res(n, l);
+int n, m, q;
 
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < l; j++) {
-            res.d[i][j] = 0;
-            for (int k = 0; k < m; k++) {
-                res.d[i][j] = (res.d[i][j] + A.d[i][k] * B.d[k][j]) % P;
-            }
+vector<pair<int, int>> G[maxn]; //最小生成树
+
+int p[maxn];
+int findf(int x) {
+    return p[x] == x ? x : p[x] = findf(p[x]);
+}
+
+void MST() {
+    for (int i = 1; i <= n; i++)
+        p[i] = i;
+    sort(edge + 1, edge + 1 + m);
+    int cnt = 0;
+    cout << endl << endl;
+    for (int i = 1; i <= m; i++) {
+        int a = findf(edge[i].u);
+        int b = findf(edge[i].v);
+        if (a == b) continue;
+
+        //加入边edge[i]
+        p[a] = b;
+        G[edge[i].u].push_back(make_pair(edge[i].v, edge[i].w));
+        G[edge[i].v].push_back(make_pair(edge[i].u, edge[i].w));
+        cnt++;
+        cout << edge[i].u << " " << edge[i].v << " " << edge[i].w << endl;
+        if (cnt == n - 1) break;
+    }
+}
+
+int dep[maxn];
+int dist[maxn][16], st[maxn][16];
+
+void dfs(int u, int f) {
+
+    for (auto e : G[u]) {
+        if (e.first == f) continue;
+        int v = e.first;
+        dep[v] = dep[u] + 1;
+        st[v][0] = u;
+        dist[v][0] = e.second;
+        dfs(v, u);
+    }
+}
+
+void lca_init() {
+    dep[1] = 0;
+    dfs(1, 0);
+
+    for (int i = 1; i <= n; i++)
+        for (int k = 1; k <= 15; k++) {
+            st[i][k] = st[st[i][k - 1]][k - 1];
+            dist[i][k] = max(dist[i][k - 1], dist[st[i][k - 1]][k - 1]);
         }
-    }
-    return res;
 }
 
-const int ops[] = {0, 4, 5, 6, 1, 2, 3};
+int l, r, k, c;
+int ans;
 
-Matrix mat_pow(Matrix a, int b) {
-    Matrix res(N, N);
-    for (int i = 0; i < N; i++)
-        res.d[i][i] = 1;
-
-    while (b) {
-        if (b & 1)
-            res = res * a;
-        b >>= 1;
-        a = a * a;
+int LCA(int a, int b) {
+    if (dep[a] < dep[b]) {
+        swap(a, b);
     }
-    return res;
-}
+    int dd = dep[a] - dep[b];
 
-LL pow_mod(LL a, LL b) {
-    LL res = 1;
-    while (b) {
-        if (b & 1)
-            res = (res * a) % P;
-        b >>= 1;
-        a = (a * a) % P;
-    }
-    return res;
+    for (int i = 15; i >= 0; i--)
+        if (dd & (1 << i)) {
+            ans = max(ans, dist[a][i]);
+            a = st[a][i];
+        }
+    if (a == b) return a;
+
+    for (int i = 15; i >= 1; i--)
+        if (st[a][i] != st[b][i]) {
+            ans = max(ans, dist[a][i]);
+            ans = max(ans, dist[b][i]);
+            a = st[a][i];
+            b = st[b][i];
+        }
+
+    ans = max(ans, dist[a][0]);
+    ans = max(ans, dist[b][0]);
+    return st[a][0];
 }
 
 int main() {
-    int n, m;
+    
+    cin >> n >> m >> q;
 
-    while (cin >> n >> m) {
-        Matrix p(N, N);
-        for (int i = 0; i < N; i++)
-            for (int j = 0; j < N; j++)
-                p.d[i][j] = 1;
-        int a, b;
-        for (int i = 1; i <= m; i++) {
-            cin >> a >> b;
-            p.d[a - 1][ops[b] - 1] = 0;
-            p.d[b - 1][ops[a] - 1] = 0;
+    for (int i = 1; i <= m; i++) {
+        cin >> edge[i].u >> edge[i].v >> edge[i].w;
+    }
+
+    //构造最小生成树
+    MST();
+    
+
+    while (q--) {
+        cin >> l >> r >> k >> c;
+        ans = 0;
+        int lca = (l - c - 1) / k + 1;
+        lca = lca * k + c;
+        if (l <= c) lca = c;
+
+        for (int j = lca + k; j <= r; j += k) {
+            lca = LCA(lca, j);
         }
-
-        Matrix ans(1, 6);
-        for (int i = 0; i < N; i++) {
-            ans.d[0][i] = 1;
-        }
-
-        p = mat_pow(p, n - 1);
-        ans = ans * p;
-        LL res = 0;
-
-        for (int i = 0; i < N; i++)
-            res = (res + ans.d[0][i]) % P;
-
-        res = (res * pow_mod(4, n)) % P;
-        cout << res << endl;
+        cout << ans << endl;
     }
 
     return 0;
