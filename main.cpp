@@ -1,23 +1,42 @@
-#include <bits/stdc++.h>
+#include <stdio.h>
+#include <string.h>
 
-using namespace std;
-
-int read(){
-    int x = 0;
-    int sgn = 1; //正负
-    char c = getchar();
-    while((c < '0' || c > '9') && c != '-') c = getchar(); // 舍弃掉前面的非数字且不是负号的字符
-    if(c == '-') {
-        sgn = -1;
-        c = getchar();
-    }
-    while(c >= '0' && c <= '9') {
-        x = x * 10 + c - '0'; // 把字符c拼到结果x的后面
-        c = getchar();
-    }
-    return sgn * x;
+void StringInGrid(int width, int height, const char* s)
+{
+	int i,k;
+	char buf[1000];
+	strcpy(buf, s);
+	if(strlen(s)>width-2) buf[width-2]=0;
+	
+	printf("+");
+	for(i=0;i<width-2;i++) printf("-");
+	printf("+\n");
+	
+	for(k=1; k<(height-1)/2;k++){
+		printf("|");
+		for(i=0;i<width-2;i++) printf(".");
+		printf("|\n");
+	}
+	
+	printf("|");
+	
+	printf("%*s%s%*s",(width-2-strlen(buf))/2,"",buf,width-2-strlen(buf)-(width-2-strlen(buf))/2,"");
+	          
+	printf("|\n");
+	
+	for(k=(height-1)/2+1; k<height-1; k++){
+		printf("|");
+		for(i=0;i<width-2;i++) printf(".");
+		printf("|\n");
+	}	
+	
+	printf("+");
+	for(i=0;i<width-2;i++) printf("-");
+	printf("+\n");	
 }
 
-int main(){
-
+int main()
+{
+	StringInGrid(10,4,"abcd123");
+	return 0;
 }
