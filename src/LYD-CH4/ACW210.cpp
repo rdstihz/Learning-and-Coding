@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const int maxn = 100000 + 100;
+const int maxn = 10000 + 100;
 typedef unsigned long long LL;
 LL a[maxn];
 
@@ -20,7 +20,7 @@ int main() {
         }
         int cnt = 0;
         bool zero = false;
-        vector<int> e;
+        vector<LL> e;
         for (int i = 1; i <= n; i++) {
             for (int j = i + 1; j <= n; j++)
                 if (a[j] > a[i])
@@ -61,11 +61,14 @@ int main() {
             cin >> x;
 
             if (zero) x--;
-
+            if (x >= 1ll << cnt) {
+                cout << -1 << endl;
+                continue;
+            }
             for (int i = 0; i < cnt; i++)
                 if (x >> i & 1)
                     ans ^= e[i];
-            cout << ans << end;
+            cout << ans << endl;
         }
     }
 
