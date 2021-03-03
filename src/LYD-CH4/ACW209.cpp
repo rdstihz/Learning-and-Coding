@@ -6,9 +6,9 @@
 using namespace std;
 
 const int maxn = 510;
-const double eps = 1e-8;
+const double eps = 1e-6;
 
-double a[maxn][maxn];
+long double a[maxn][maxn];
 int c[maxn];
 
 int main() {
