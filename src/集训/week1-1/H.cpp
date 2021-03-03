@@ -4,7 +4,7 @@ using namespace std;
 
 const int maxn = 10000 + 100;
 int a[maxn], b[maxn];
-long long f[maxn];
+long long f[10000000 + 10];
 
 int main() {
     int m, n;
@@ -15,10 +15,8 @@ int main() {
     }
 
     for (int i = 1; i <= n; i++) {
-        for (int j = m; j >= 1; j--) {
-            for (int t = 1; t * a[i] <= j; t++) {
-                f[j] = max(f[j], f[j - t * a[i]] + t * b[i]);
-            }
+        for (int j = 1; j <= m; j++) {
+            if(j >= a[i]) f[j] = max(f[j], f[j - a[i]] + b[i]);
         }
     }
     cout << f[m] << endl;
