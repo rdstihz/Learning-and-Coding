@@ -4,16 +4,16 @@ for k in range(1, T + 1):
     N, a, b = map(int, input().split())
 
     ans = ()
-    maxv = -1
+    maxv = 0
 
     for i in range(N):
         x, y, z = map(int, input().split())
 
         if y % 2 == 1 or y > 2 * (x + 1):
             continue
-
-        if x * a + y * b / 2 > maxv:
-            maxv = x * a + y * b / 2
+        M = 12 * x + y + 16 * z
+        if (x * a + y * b / 2) / M > maxv:
+            maxv = (x * a + y * b / 2 ) / M
             ans = (x, y, z)
 
     print("Case {}: ".format(k), end = '')

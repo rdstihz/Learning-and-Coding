@@ -5,10 +5,12 @@ using namespace std;
 const int maxn = 1010;
 const int P = 10007;
 
-int C[maxn][maxn];
+typedef long long LL;
 
-int pow_mod(int a, int b) {
-    int res = 1;
+LL C[maxn][maxn];
+
+LL pow_mod(LL a, LL b) {
+    LL res = 1;
     while (b) {
         if (b & 1)
             res = (res * a) % P;
@@ -31,7 +33,7 @@ int main() {
         }
     }
 
-    int ans = ((pow_mod(a, n) * pow_mod(b, m) % P) * C[k][n]) % P;
+    LL ans = ((pow_mod(a, n) * pow_mod(b, m) % P) * C[k][n]) % P;
 
     cout << ans << endl;
 
