@@ -47,6 +47,11 @@ int main() {
     cin >> n >> q;
     int p = P - 1;
 
+    if(q % P == 0) {
+        cout << 0 << endl;
+        return 0;
+    }
+
     //将p分解质因数
     int k = 0, pp = p;
     for (int i = 2; i * i <= pp; i++) {
@@ -60,9 +65,9 @@ int main() {
     if (pp > 1)
         a[++k] = pp;
 
-    for (int i = 1; i <= k; i++)
-        cout << a[i] << " ";
-    cout << endl;
+    // for (int i = 1; i <= k; i++)
+    //     cout << a[i] << " ";
+    // cout << endl;
 
     for (int i = 1; i <= k; i++) {
         for (int d = 1; d * d <= n; d++) {
@@ -74,9 +79,9 @@ int main() {
         }
     }
 
-    for (int i = 1; i <= k; i++) {
-        cout << a[i] << " " << b[i] << endl;
-    }
+    // for (int i = 1; i <= k; i++) {
+    //     cout << a[i] << " " << b[i] << endl;
+    // }
 
     LL M = 1;
     for (int i = 1; i <= k; i++) {
