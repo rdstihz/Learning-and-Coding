@@ -24,8 +24,8 @@ inline LL C(LL n, LL m) {
         a = a * (i % P) % P;
     // for (LL i = 1; i <= m; i++)
     //     b = b * i % P;
-    b = prod[m];
-    return a * pow_mod(b, P - 2, P) % P;
+    b = aprod[m];
+    return a * b % P;
 }
 
 template <typename T>
@@ -45,7 +45,7 @@ int main() {
     read(n);
     read(m);
 
-    prod[0] = aprod[i] = 1;
+    prod[0] = aprod[0] = 1;
     for (int i = 1; i <= n; i++) {
         prod[i] = prod[i - 1] * i % P;
         aprod[i] = pow_mod(prod[i], P - 2, P);
