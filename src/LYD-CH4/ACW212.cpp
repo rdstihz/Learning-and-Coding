@@ -30,7 +30,7 @@ int T(int x, int y, int n) {
 }
 
 void init() {
-    int N = 10000;
+    int N = 100000;
     //预处理阶乘和逆元
     prod[0] = aprod[0] = 1;
     for (int i = 1; i <= N; i++) {
