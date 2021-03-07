@@ -26,7 +26,7 @@ int main() {
                 ans--;
                 continue;
             }
-            for (int j = 0; j + a[i] <= 1000; j++)
+            for (int j = 0; j + a[i] <= 25000; j++)
                 vis[j + a[i]] |= vis[j];
         }
         cout << ans << endl;
