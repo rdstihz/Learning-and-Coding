@@ -11,6 +11,7 @@ int x[maxn], y[maxn];
 int l[maxn], h[maxn];
 
 int f[maxn][1010];
+bool pipe[maxn];
 
 int main() {
     int n, m, k;
@@ -20,15 +21,16 @@ int main() {
         cin >> x[i] >> y[i];
     }
 
-    for (int i = 1; i <= n; i++) {
+    for (int i = 0; i <= n; i++) {
         l[i] = 1;
         h[i] = m;
     }
     int p, a, b;
     for (int i = 1; i <= k; i++) {
         cin >> p >> a >> b;
-        l[i] = a + 1;
-        h[i] = b - 1;
+        l[p] = a + 1;
+        h[p] = b - 1;
+        pipe[p] = true;
     }
 
     memset(f, 0x3f, sizeof(f));
@@ -38,17 +40,17 @@ int main() {
 
     for (int i = 0; i < n; i++) {
         bool ok = false;
-        for (int j = 1; j <= m; j++) {
+        for (int j = l[i]; j <= h[i]; j++) {
             if (f[i][j] != INF) {
                 ok = true;
 
                 //下落
-                if (j > y[i] && j - y[i] >= l[i + 1] && j - y[i] <= h[i + 1]) {
+                if (j - y[i] >= l[i + 1] && j - y[i] <= h[i + 1]) {
                     f[i + 1][j - y[i]] = min(f[i + 1][j - y[i]], f[i][j]);
                 }
 
                 //上
-                for (int k = 0;; k++) {
+                for (int k = 1;; k++) {
                     int t = j + x[i] * k;
                     if (h[i + 1] == m && t > m) {
                         t = m;
@@ -66,7 +68,10 @@ int main() {
 
         if (!ok) {
             cout << 0 << endl;
-            cout << i - 1 << endl;
+            int cnt = 0;
+            for(int j = 0; j < i; j++)
+                cnt += pipe[j];
+            cout << cnt << endl;
             return 0;
         }
     }
@@ -77,7 +82,7 @@ int main() {
 
     if (ans == INF) {
         cout << 0 << endl
-             << n - 1 << endl;
+             << k - 1 << endl;
     } else {
         cout << 1 << endl
              << ans << endl;
