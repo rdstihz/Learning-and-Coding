@@ -1,43 +1,43 @@
-#include <iostream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-typedef long long LL;
+const int maxn = 3010;
 
-LL P = 1e9 + 7;
+int p[maxn];
 
-LL a[100], b[100];
-
-void divide(LL x, LL k, LL* p) {
+void init(int n,int k){
     p[0] = 0;
-    while (x) {
-        p[++p[0]] = x % k;
-        x /= k;
+
+    for(int i = 1;i <= n; i++) {
+        p[i] = p[i - 1];
+        int t = i;
+        while(t % k == 0) {
+            p[i]++;
+            t /= k;
+        }
     }
 }
 
-LL pow_mod(LL a, LL b, LL p) {
-    LL res = 1;
-    while (b) {
-        if (b & 1)
-            res = res * a % p;
-        a = a * a % p;
-        b >>= 1;
-    }
-    return res % p;
-}
+int main(){
+    int t,k;
+    cin >> t >> k;
 
-int main() {
-    LL T, k;
-    cin >> T >> k;
-    LL n, m;
-    LL t = k * (k + 1) / 2;
-    while (T--) {
+    init(3000, k);
+
+    int n,m;
+    while(t--) {
         cin >> n >> m;
-        divide(n, k, a);
-        divide(m, k, b);
+        long long ans = 0;
 
-        LL res = pow_mod(t, min(a[0], b[0]) - 1, P);
+        for(int i = 1; i <= n; i++) {
+            for(int j = 0; j <= i && j <= m; j++)
+                if(p[i] > p[j] + p[i - j])
+                    ans++;
+
+        }
+
+        cout << ans << endl;
     }
 
     return 0;
