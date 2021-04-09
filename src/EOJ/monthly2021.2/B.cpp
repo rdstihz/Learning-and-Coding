@@ -1,12 +1,8 @@
-#include <algorithm>
-#include <cstring>
-#include <iostream>
-#include <queue>
-#include <vector>
+#include <bits/stdc++.h>
 
 using namespace std;
 
-typedef long long LL;
+int n, m;
 
 const int maxn = 5010;
 const int INF = 0x3f3f3f3f;
@@ -14,50 +10,34 @@ const int INF = 0x3f3f3f3f;
 vector<int> G[maxn];
 
 int d[maxn], dd[maxn];
-int n, m;
-LL f[maxn], g[maxn];
+int f[maxn], g[maxn];
 
 double e[maxn];
 
-queue<int> Q;
-void bfs(int s, int t) {
-    memset(d, 0x3f, sizeof(d));
-    memset(f, 0, sizeof(f));
+void bfs(int s, int t, int* d, int* f) {
+    queue<int> Q;
+
+    memset(d, 0x3f, sizeof(int) * maxn);
+    memset(f, 0, sizeof(int) * maxn);
+
+    Q.push(s);
     d[s] = 0;
     f[s] = 1;
 
-    Q.push(s);
-
     while (Q.size()) {
         int u = Q.front();
         Q.pop();
 
+        if (d[u] == d[t])
+            break;
+
         for (int v : G[u]) {
-            if (d[v] >= d[u] + 1) {
+            if (d[u] + 1 < d[v]) {
                 d[v] = d[u] + 1;
+                f[v] = f[u];
+                Q.push(v);
+            } else if (d[u] + 1 == d[v]) {
                 f[v] += f[u];
-
-                if (v != t) Q.push(v);
-            }
-        }
-    }
-}
-
-void bfs2(int s, int t) {
-
-    memset(g, 0, sizeof(g));
-    g[s] = 1;
-
-    Q.push(s);
-
-    while (Q.size()) {
-        int u = Q.front();
-        Q.pop();
-
-        for (int v : G[u]) {
-            if (d[v] == d[u] - 1) {
-                g[v] += g[u];
-                if (v != t) Q.push(v);
             }
         }
     }
@@ -66,8 +46,8 @@ void bfs2(int s, int t) {
 int main() {
 
     cin >> n >> m;
-    int a, b;
 
+    int a, b;
     for (int i = 1; i <= m; i++) {
         cin >> a >> b;
         G[a].push_back(b);
@@ -76,14 +56,15 @@ int main() {
 
     int k;
     cin >> k;
-
     while (k--) {
         cin >> a >> b;
-        bfs(a, b);
-        bfs2(b, a);
+        bfs(a, b, d, f);
+        bfs(b, a, dd, g);
 
         for (int i = 0; i < n; i++) {
-            e[i] += (1.0 * f[i]) / (1.0 * f[b]) * (1.0 * g[i]);
+            if (d[i] + dd[i] == d[b]) {
+                e[i] += 1.0 / f[b] * f[i] * g[i];
+            }
         }
     }
 
