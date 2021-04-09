@@ -1,110 +1,98 @@
-#include <iostream>
 #include <algorithm>
+#include <cstring>
+#include <iostream>
+#include <queue>
 #include <vector>
 
 using namespace std;
-const int N = 12;
-const int maxn = 5000 + 10;
+
+typedef long long LL;
+
+const int maxn = 5010;
+const int INF = 0x3f3f3f3f;
+
 vector<int> G[maxn];
+
+int d[maxn], dd[maxn];
 int n, m;
-int dep[maxn], st[maxn][N + 2];
-int diff[maxn], val[maxn];
+LL f[maxn], g[maxn];
 
-void dfs(int u, int f) {
+double e[maxn];
 
-    for (int v : G[u]) {
-        if (!dep[v]) {
-            dep[v] = dep[u] + 1;
-            st[v][0] = u;
-            dfs(v, u);
+queue<int> Q;
+void bfs(int s, int t) {
+    memset(d, 0x3f, sizeof(d));
+    memset(f, 0, sizeof(f));
+    d[s] = 0;
+    f[s] = 1;
+
+    Q.push(s);
+
+    while (Q.size()) {
+        int u = Q.front();
+        Q.pop();
+
+        for (int v : G[u]) {
+            if (d[v] >= d[u] + 1) {
+                d[v] = d[u] + 1;
+                f[v] += f[u];
+
+                if (v != t) Q.push(v);
+            }
         }
     }
 }
 
-void st_init() {
-    for (int k = 1; k <= N; k++)
-        for (int i = 0; i <= n; i++)
-            st[i][k] = st[st[i][k - 1]][k - 1];
-}
+void bfs2(int s, int t) {
 
-int LCA(int a, int b) {
-    if (dep[a] < dep[b])
-        swap(a, b);
-    int dh = dep[a] - dep[b];
-    for (int i = N; i >= 0; i--)
-        if (dh & (1 << i)) {
-            a = st[a][i];
-            dh -= 1 << i;
-        }
-    if (a == b) return a;
-    for (int i = N; i >= 0; i--) {
-        if (st[a][i] != st[b][i]) {
-            a = st[a][i];
-            b = st[b][i];
+    memset(g, 0, sizeof(g));
+    g[s] = 1;
+
+    Q.push(s);
+
+    while (Q.size()) {
+        int u = Q.front();
+        Q.pop();
+
+        for (int v : G[u]) {
+            if (d[v] == d[u] - 1) {
+                g[v] += g[u];
+                if (v != t) Q.push(v);
+            }
         }
     }
-    return st[a][0];
-}
-
-void dfs2(int u, int f) {
-
-    for (int v : G[u])
-        if (v != f) {
-            dfs2(v, u);
-            val[u] += val[v];
-        }
-    val[u] += diff[u];
 }
 
 int main() {
 
     cin >> n >> m;
-    int u, v;
+    int a, b;
+
     for (int i = 1; i <= m; i++) {
-        cin >> u >> v;
-        u++;
-        v++;
-        G[u].push_back(v);
-        G[v].push_back(u);
+        cin >> a >> b;
+        G[a].push_back(b);
+        G[b].push_back(a);
     }
 
-    G[0].push_back(1);
-    dfs(0, -1);
-    st_init();
     int k;
     cin >> k;
-    int a, b;
 
     while (k--) {
         cin >> a >> b;
-        a++, b++;
-        int lca = LCA(a, b);
+        bfs(a, b);
+        bfs2(b, a);
 
-        diff[a]++;
-        diff[b]++;
-
-        diff[lca]--;
-        diff[st[lca][0]]--;
-    }
-    dfs2(0, -1);
-
-    int maxv = -1;
-    int ans;
-
-    for (int i = 1; i <= n; i++) {
-        if (val[i] > maxv) {
-            maxv = val[i];
-            ans = i;
+        for (int i = 0; i < n; i++) {
+            e[i] += (1.0 * f[i]) / (1.0 * f[b]) * (1.0 * g[i]);
         }
     }
 
-    // for(int i = 1; i <= n;i++)
-    //     cout << diff[i] << " ";
-    // cout << endl;
+    int ans = 0;
+    for (int i = 1; i < n; i++)
+        if (e[i] > e[ans])
+            ans = i;
 
-    // for (int i = 1; i <= n; i++)
-    //     cout << val[i] << " ";
-    // cout << endl;
-    cout << ans - 1 << endl;
+    cout << ans << endl;
+
     return 0;
 }
