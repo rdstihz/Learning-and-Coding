@@ -1,62 +1,59 @@
-#include <iostream>
 #include <algorithm>
-#include <cstring>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
-const int maxn = 50000 + 10;
-const int N = 15;
+const int maxn = 50000 + 100;
+typedef pair<int, int> PII;
 
-int to[maxn * 2], nxt[maxn * 2], len[maxn * 2];
-int fir[maxn];
+vector<PII> G[maxn];
+
+int dep[maxn];
+int dist[maxn];
+int dfn[maxn];
 int tot;
 
-int n;
-
-void add(int u, int v, int w) {
-    tot++;
-    to[tot] = v, len[tot] = w;
-    nxt[tot] = fir[u], fir[u] = tot;
-
-    tot++;
-    to[tot] = u, len[tot] = w;
-    nxt[tot] = fir[v], fir[v] = tot;
-}
-
-int dep[maxn], st[maxn][N + 1];
-int dist[maxn]; //去父节点的距离
-bool vis[maxn];
+int st[maxn][16];
 
 void dfs(int u, int f) {
-
-    for (int e = fir[u]; e; e = nxt[e]) {
-        int v = to[e];
-        if (!dep[v]) {
-            dep[v] = dep[u] + 1;
-            st[v][0] = u;
-            dist[v] = len[e];
-            dfs(v, u);
+    dfn[u] = ++tot;
+    for (PII e : G[u])
+        if (e.first != f) {
+            dep[e.first] = dep[u] + 1;
+            dist[e.first] = dist[u] + e.second;
+            st[e.first][0] = u;
+            dfs(e.first, u);
         }
+}
+
+void st_init(int n) {
+
+    for (int k = 1; k <= 15; k++) {
+        for (int i = 1; i <= n; i++)
+            st[i][k] = st[st[i][k - 1]][k - 1];
     }
 }
 
-void st_init() {
-    for (int k = 1; k <= N; k++)
-        for (int i = 0; i <= n; i++)
-            st[i][k] = st[st[i][k - 1]][k - 1];
+bool cmp(int a, int b) {
+    return dfn[a] < dfn[b];
 }
 
 int LCA(int a, int b) {
-    if (dep[a] < dep[b])
+    if (dep[a] < dep[b]) {
         swap(a, b);
-    int dh = dep[a] - dep[b];
-    for (int i = N; i >= 0; i--)
-        if (dh & (1 << i)) {
+    }
+
+    int dd = dep[a] - dep[b];
+
+    for (int i = 0; i <= 15; i++)
+        if ((dd >> i) & 1)
             a = st[a][i];
-            dh -= 1 << i;
-        }
-    if (a == b) return a;
-    for (int i = N; i >= 0; i--) {
+
+    if (a == b)
+        return a;
+
+    for (int i = 15; i >= 0; i--) {
         if (st[a][i] != st[b][i]) {
             a = st[a][i];
             b = st[b][i];
@@ -66,48 +63,60 @@ int LCA(int a, int b) {
 }
 
 int main() {
-
+    ios_base::sync_with_stdio(false);
+    int n;
     cin >> n;
-    int u, v, w;
 
+    int u, v, w;
     for (int i = 1; i < n; i++) {
+
         cin >> u >> v >> w;
         u++;
         v++;
-        add(u, v, w);
+        G[u].push_back(make_pair(v, w));
+        G[v].push_back(make_pair(u, w));
     }
-    dep[1] = 1;
-    dfs(1, 0);
-    st_init();
 
-    int q;
-    cin >> q;
-    int a[5];
-    while (q--) {
-        for (int i = 0; i < 5; i++) {
+    dep[1] = 1;
+    dist[1] = 0;
+
+    dfs(1, 0);
+
+    st_init(n);
+
+    int a[7];
+    int m;
+    cin >> m;
+    while (m--) {
+        for (int i = 1; i <= 5; i++) {
             cin >> a[i];
             a[i]++;
         }
-        int lca = a[0];
-        for (int i = 1; i < 5; i++) {
-            lca = LCA(lca, a[i]);
-        }
+        sort(a + 1, a + 6, cmp);
+        a[6] = a[1];
 
         int ans = 0;
-        memset(vis,0,sizeof(vis));
-        vis[lca] = true;
-        for(int i = 0;i < 5;i++) {
-            int u = a[i];
-            while(!vis[u]) {
-                ans += dist[u];
-                vis[u] = true;
-                u = st[u][0];
-                
-            }
+
+        for (int i = 2; i <= 6; i++) {
+            int lca = LCA(a[i - 1], a[i]);
+            ans += dist[a[i - 1]] + dist[a[i]] - 2 * dist[lca];
         }
-        
-        cout << ans << endl;
+        cout << ans / 2 << endl;
     }
 
     return 0;
 }
+/*
+
+6
+4 0 4
+0 1 2
+1 3 9
+3 5 1
+3 2 5
+2
+4 0 3 5 2
+0 4 1 3 5
+
+
+*/
