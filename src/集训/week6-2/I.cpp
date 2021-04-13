@@ -21,7 +21,7 @@ int a[maxn];
 int Q[maxn];
 int l, r;
 
-inline double getk(int i, int j) {
+inline double getk(int j, int i) {
     return 1.0 * (a[i] - a[j]) / (i - j);
 }
 
