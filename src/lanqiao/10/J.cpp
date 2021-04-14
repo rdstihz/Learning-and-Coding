@@ -1,42 +1,90 @@
-#include <bits/stdc++.h>
+#include <iostream>
+
+#include <cmath>
 
 using namespace std;
 
-const int maxn = 3010;
+typedef long long LL;
 
-int p[maxn];
+const LL P = 1e9 + 7;
 
-void init(int n,int k){
+LL k, K;
+LL T;
+
+const int maxn = 200;
+LL p[maxn], q[maxn];
+
+void divide(LL x, LL* p) {
     p[0] = 0;
 
-    for(int i = 1;i <= n; i++) {
-        p[i] = p[i - 1];
-        int t = i;
-        while(t % k == 0) {
-            p[i]++;
-            t /= k;
-        }
+    while (x) {
+        p[++p[0]] = x % k;
+        x /= k;
     }
 }
 
-int main(){
-    int t,k;
-    cin >> t >> k;
+LL pow_mod(LL a, LL b, LL p) {
+    LL res = 1;
 
-    init(3000, k);
+    while (b) {
+        if (b & 1)
+            res = res * a % p;
+        b >>= 1;
+        a = a * a % p;
+    }
 
-    int n,m;
-    while(t--) {
+    return res % p;
+}
+
+LL getnums(LL n, LL m) {
+
+    n++;
+    if (n <= m) { // 1 + 2 + 3 + ... + n
+        return (n * (n + 1) / 2) % P;
+    } else {
+        LL res = (m * (m + 1) / 2) % P; // 1 + 2 + 3 + ... + m
+
+        n -= m;
+        res = (res + n * (m + 1) % P) % P;
+        return res;
+    }
+}
+
+LL dfs(int pos) {
+
+    if (pos == 0)
+        return 1;
+
+    LL t1 = getnums(p[pos], q[pos]);
+    LL t2 = min(p[pos], q[pos]) + 1;
+
+    LL res = (t1 - t2) * pow_mod(K, pos - 1, P) % P;
+    res = (res + (t2 * dfs(pos - 1)) % P ) % P;
+
+    return res;
+}
+
+int main() {
+
+    int T;
+    cin >> T >> k;
+    K = (k * (k + 1) / 2) % P;
+
+    while (T--) {
+        LL n, m;
         cin >> n >> m;
-        long long ans = 0;
-
-        for(int i = 1; i <= n; i++) {
-            for(int j = 0; j <= i && j <= m; j++)
-                if(p[i] > p[j] + p[i - j])
-                    ans++;
-
+        if (m > n) {
+            m = n;
         }
+        divide(n, p);
+        divide(m, q);
 
+
+        LL res = dfs(p[0]);
+
+        LL total = getnums(n, m);
+
+        LL ans = (total + P - res) % P;
         cout << ans << endl;
     }
 
