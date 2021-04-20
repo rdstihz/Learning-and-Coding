@@ -2,19 +2,21 @@
 #include <cstdio>
 using namespace std;
 
-const int maxn = 200000 + 100;
+const int maxn = 300000 + 100;
 
 struct Node {
     int v;
     int L, R;
     int lc, rc;
-} node[4000000];
+    int maxv;
+} node[2 * maxn];
 int tot;
 
 void update(int p, int q, int l, int r, int pos) {
     node[q] = node[p];
     if (l == r) {
         node[q].v++;
+        node[q].maxv++;
         return;
     }
     int m = l + r >> 1;
@@ -32,6 +34,7 @@ void update(int p, int q, int l, int r, int pos) {
     }
 
     node[q].v = node[node[q].lc].v + node[node[q].rc].v;
+    node[q].maxv = max(node[node[q].lc].maxv, node[node[q].rc].maxv);
 }
 
 int ask(int p, int q, int l, int r, int k) {
@@ -48,10 +51,19 @@ int ask(int p, int q, int l, int r, int k) {
     }
 }
 
+int get_max(int p, int q, int l, int r, int k) {
+    if (l == r) {
+        return node[p].maxv;
+    }
+}
+
 int build(int L, int R) {
     int u = ++tot;
     node[u].L = L;
     node[u].R = R;
+    node[u].maxv = 0;
+    node[u].maxv = 1;
+
     if (L == R) {
 
     } else {
@@ -84,7 +96,7 @@ int main() {
     for (int i = 1; i <= m; i++) {
         int l, r, k;
         scanf("%d%d%d", &l, &r, &k);
-        printf("%d\n", temp[ask(rt[l - 1], rt[r], 1, cnt, k)]);
+        printf("%d\n", temp[ask(rt[l - 1], rt[r], 1, cnt, k)]); //区间第k小
     }
 
     return 0;
