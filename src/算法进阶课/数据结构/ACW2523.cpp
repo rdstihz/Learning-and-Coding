@@ -7,7 +7,7 @@ typedef long long LL;
 const int maxn = 100000 + 100;
 
 int color[maxn];
-vector<LL> temp;
+vector<int> temp;
 
 int cnt[maxn];
 LL ans[maxn];
@@ -31,18 +31,32 @@ struct Query {
 
 void add(int x, LL& res) {
     cnt[x]++;
-    if (temp[x] * cnt[x] > res)
-        res = temp[x] * cnt[x];
+    if ((LL)temp[x] * cnt[x] > res)
+        res = (LL)temp[x] * cnt[x];
+}
+
+int readIn() {
+    int x = 0;
+    char c = getchar();
+    while (c < '0' || c > '9')
+        c = getchar();
+
+    while (c >= '0' && c <= '9') {
+        x = x * 10 + c - '0';
+        c = getchar();
+    }
+    return x;
 }
 
 int main() {
 
     int n, m;
-    cin >> n >> m;
+    n = readIn();
+    m = readIn();
     len = sqrt(n);
 
     for (int i = 1; i <= n; i++) {
-        cin >> color[i];
+        color[i] = readIn();
         temp.push_back(color[i]);
     }
 
