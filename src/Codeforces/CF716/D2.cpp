@@ -1,103 +1,121 @@
-#include <algorithm>
-#include <cstdio>
+#include <bits/stdc++.h>
+
 using namespace std;
+
+typedef int LL;
 
 const int maxn = 300000 + 100;
 
-struct Node {
-    int v;
-    int L, R;
-    int lc, rc;
-    int maxv;
-} node[2 * maxn];
-int tot;
+int color[maxn];
 
-void update(int p, int q, int l, int r, int pos) {
-    node[q] = node[p];
-    if (l == r) {
-        node[q].v++;
-        node[q].maxv++;
-        return;
-    }
-    int m = l + r >> 1;
+int cnt[maxn];
+LL ans[maxn];
 
-    if (pos <= m) {
-        node[q].lc = ++tot;
-        node[tot].L = l;
-        node[tot].R = m;
-        update(node[p].lc, node[q].lc, l, m, pos);
-    } else {
-        node[q].rc = ++tot;
-        node[tot].L = m + 1;
-        node[tot].R = r;
-        update(node[p].rc, node[q].rc, m + 1, r, pos);
-    }
+int len;
 
-    node[q].v = node[node[q].lc].v + node[node[q].rc].v;
-    node[q].maxv = max(node[node[q].lc].maxv, node[node[q].rc].maxv);
+inline int get(int x) {
+    return x / len;
 }
 
-int ask(int p, int q, int l, int r, int k) {
-    if (l == r) {
-        return l;
-    }
+struct Query {
+    int id, l, r;
 
-    int m = l + r >> 1;
-    int lcnt = node[node[q].lc].v - node[node[p].lc].v;
-    if (k <= lcnt) {
-        return ask(node[p].lc, node[q].lc, l, m, k);
-    } else {
-        return ask(node[p].rc, node[q].rc, m + 1, r, k - lcnt);
+    bool operator<(const Query& phs) {
+        int la = get(l);
+        int lb = get(phs.l);
+        if (la != lb) return la < lb;
+        return r < phs.r;
     }
+} query[maxn];
+
+void add(int x, LL& res) {
+    cnt[x]++;
+    res = max(res, cnt[x]);
 }
 
-int get_max(int p, int q, int l, int r, int k) {
-    if (l == r) {
-        return node[p].maxv;
+int readIn() {
+    int x = 0;
+    char c = getchar();
+    while (c < '0' || c > '9')
+        c = getchar();
+
+    while (c >= '0' && c <= '9') {
+        x = x * 10 + c - '0';
+        c = getchar();
     }
+    return x;
 }
 
-int build(int L, int R) {
-    int u = ++tot;
-    node[u].L = L;
-    node[u].R = R;
-    node[u].maxv = 0;
-    node[u].maxv = 1;
-
-    if (L == R) {
-
-    } else {
-        int M = L + R >> 1;
-        node[u].lc = build(L, M);
-        node[u].rc = build(M + 1, R);
-    }
-    return u;
-}
-
-int A[maxn], temp[maxn];
-int rt[maxn];
 int main() {
-    int n, m;
-    scanf("%d%d", &n, &m);
-    for (int i = 1; i <= n; i++)
-        scanf("%d", A + i), temp[i] = A[i];
-    tot = 0;
-    sort(temp + 1, temp + 1 + n);
-    int cnt = unique(temp + 1, temp + 1 + n) - temp - 1;
 
-    rt[0] = build(1, cnt);
+    int n, m;
+    n = readIn();
+    m = readIn();
+    len = sqrt(n);
 
     for (int i = 1; i <= n; i++) {
-        A[i] = lower_bound(temp + 1, temp + 1 + cnt, A[i]) - temp;
-        rt[i] = ++tot;
-        update(rt[i - 1], rt[i], 1, cnt, A[i]);
+        color[i] = readIn();
     }
 
     for (int i = 1; i <= m; i++) {
-        int l, r, k;
-        scanf("%d%d%d", &l, &r, &k);
-        printf("%d\n", temp[ask(rt[l - 1], rt[r], 1, cnt, k)]); //区间第k小
+        query[i].id = i;
+        query[i].l = readIn();
+        query[i].r = readIn();
     }
+
+    sort(query + 1, query + 1 + m);
+
+    for (int x = 1; x <= m;) {
+        int y = x;
+
+        //块号
+        int block = get(query[x].l);
+
+        //块的右端点
+        int right = (len - 1) + block * len;
+
+        while (y <= m && query[y].l <= right)
+            y++;
+
+        while (x < y && query[x].r <= right) {
+            LL res = 0;
+            for (int i = query[x].l; i <= query[x].r; i++)
+                add(color[i], res);
+
+            ans[query[x].id] = max(1, 2 * res - (query[x].r - query[x].l + 1));
+
+            for (int i = query[x].l; i <= query[x].r; i++)
+                cnt[color[i]]--;
+
+            x++;
+        }
+
+        int r = right;
+        LL res = 0;
+        while (x < y) {
+            while (r < query[x].r) {
+                add(color[++r], res);
+            }
+
+            LL backup = res;
+
+            for (int i = right; i >= query[x].l; i--)
+                add(color[i], res);
+
+            ans[query[x].id] = max(1, 2 * res - (query[x].r - query[x].l + 1));
+
+            res = backup;
+            for (int i = right; i >= query[x].l; i--)
+                cnt[color[i]]--;
+
+            x++;
+        }
+
+        memset(cnt, 0, sizeof(cnt));
+    }
+
+    for (int i = 1; i <= m; i++)
+        cout << ans[i] << endl;
 
     return 0;
 }

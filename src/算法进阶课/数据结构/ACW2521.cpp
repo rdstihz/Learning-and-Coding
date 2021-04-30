@@ -70,7 +70,7 @@ int main() {
             rp[++ct] = {l, r};
         }
     }
-    len = pow(n * ct, 1.f / 3);
+    len = pow(n * ct, 1.f / 3) + 1;
     sort(query + 1, query + cq + 1);
 
     int res = 0;

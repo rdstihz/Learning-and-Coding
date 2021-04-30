@@ -1,25 +1,15 @@
-#include <algorithm>
-#include <cmath>
-#include <cstdio>
-#include <vector>
-#define belong(x) ((x - 1) / size + 1)
+//莫队求区间众数
+
+#include <bits/stdc++.h>
 
 using namespace std;
 
 const int maxn = 300000 + 100;
-const int maxm = 600;
-const int INF = 0x3f3f3f3f;
-int color[maxn], val[maxn];
 
-int lb[1000], rb[1000];
-int v[maxm][maxm];
-int time[maxm][maxm];
+int color[maxn];
+int cnt[maxn];
 
-int s[600][maxn];
-
-vector<int> pos[maxn];
-
-int read() {
+int readIn() {
     int x = 0;
     char c = getchar();
     while (c < '0' || c > '9')
@@ -31,122 +21,97 @@ int read() {
     return x;
 }
 
+int len;
+
+int get(int x) {
+    return x / len;
+}
+
+struct Query {
+    int id, l, r;
+    bool operator<(const Query& phs) const {
+        int la = get(l);
+        int lb = get(phs.l);
+        if (la != lb) return la < lb;
+        return r < phs.r;
+    }
+} query[maxn];
+
+void add(int x, int& res) {
+    cnt[x]++;
+    res = max(res, cnt[x]);
+}
+int ans[maxn];
+
 int main() {
 
-    int n, T;
-    n = read();
-    T = read();
+    int n, m;
+    n = readIn();
+    m = readIn();
 
-    for (int i = 1; i <= n; i++) {
-        color[i] = read();
+    for (int i = 1; i <= n; i++)
+        color[i] = readIn();
+
+    len = sqrt(n) + 1;
+
+    for (int i = 1; i <= m; i++) {
+        query[i].id = i;
+        query[i].l = readIn();
+        query[i].r = readIn();
     }
 
-    int size = sqrt(n);
-    int block = (n - 1) / size + 1;
+    sort(query + 1, query + 1 + m);
 
-    for (int i = 1; i <= block; i++) {
-        lb[i] = rb[i - 1] + 1;
-        rb[i] = rb[i - 1] + size;
-    }
-    rb[block] = n;
-    lb[block + 1] = INF;
-    rb[0] = -INF;
+    for (int x = 1; x <= m;) {
+        int y = x;
+        int block = get(query[x].l);
+        int right = len - 1 + block * len;
 
-    int m = n;
+        while (y <= m && query[y].l <= right)
+            y++;
 
-    for (int i = 1; i <= n; i++) {
-        pos[color[i]].push_back(i);
-    }
-
-    for (int i = 1; i <= n; i++) {
-        s[belong(i)][color[i]]++;
-    }
-    for (int i = 1; i <= block; i++)
-        for (int j = 1; j <= m; j++)
-            s[i][j] += s[i - 1][j];
-    //预处理每个块区间的信息
-
-    for (int l = block; l >= 1; l--) {
-        for (int r = l; r <= block; r++) {
-            if (l == r) {
-                int tempv = 0, times = 0;
-                int a, b;
-                for (int i = lb[r]; i <= rb[r]; i++) {
-                    int col = color[i];
-                    b = s[r][col] - s[l - 1][col];
-                    if (b > times || (b == times && col < tempv)) {
-                        tempv = col;
-                        times = b;
-                    }
-                }
-                v[l][r] = tempv;
-                time[l][r] = times;
-
-            } else {
-                int tempv = v[l][r - 1];
-                int times = time[l][r - 1];
-                int b = s[r][tempv] - s[l - 1][tempv];
-                times = b;
-
-                for (int i = lb[r]; i <= rb[r]; i++) {
-                    int col = color[i];
-                    b = s[r][col] - s[l - 1][col];
-                    if (b > times || (b == times && col < tempv)) {
-                        tempv = col;
-                        times = b;
-                    }
-                }
-                v[l][r] = tempv;
-                time[l][r] = times;
+        //块内，暴力求解
+        while (x < y && query[x].r <= right) {
+            int res = 0;
+            for (int i = query[x].l; i <= query[x].r; i++) {
+                add(color[i], res);
             }
-        }
-    }
-
-    int l, r;
-    int x = 0;
-    while (T--) {
-        l = read();
-        r = read();
-        //l = (l + x - 1) % n + 1;
-        //r = (r + x - 1) % n + 1;
-        if (l > r) swap(l, r);
-        //大块
-        int L = (l - 1) / size + 2; //向上取整
-        if (l % size == 1) L--;
-        int R = r / size;
-
-        int tempv = v[L][R];
-        int times = time[L][R];
-        int a, b;
-
-        int col;
-        //左边小块
-        for (int i = l; i <= rb[L - 1]; i++) {
-            col = color[i];
-            a = lower_bound(pos[col].begin(), pos[col].end(), l) - pos[col].begin();
-            b = upper_bound(pos[col].begin(), pos[col].end(), r) - pos[col].begin();
-            b -= a;
-            if (b > times || (b == times && col < tempv)) {
-                tempv = col;
-                times = b;
+            for (int i = query[x].l; i <= query[x].r; i++) {
+                cnt[color[i]]--;
             }
+            int t = query[x].r - query[x].l + 1;
+            ans[query[x].id] = max(1, 2 * res - t);
+
+            x++;
         }
 
-        //右边小块
-        for (int i = lb[R + 1]; i <= r; i++) {
-            col = color[i];
-            a = lower_bound(pos[col].begin(), pos[col].end(), l) - pos[col].begin();
-            b = upper_bound(pos[col].begin(), pos[col].end(), r) - pos[col].begin();
-            b -= a;
-            if (b > times || (b == times && col < tempv)) {
-                tempv = col;
-                times = b;
-            }
+        //块间
+        int r = right;
+        int res = 0;
+        while (x < y) {
+
+            while (r < query[x].r)
+                add(color[++r], res);
+
+            int backup = res;
+
+            for (int i = right; i >= query[x].l; i--)
+                add(color[i], res);
+
+            int t = query[x].r - query[x].l + 1;
+            ans[query[x].id] = max(1, 2 * res - t);
+
+            res = backup;
+            for (int i = right; i >= query[x].l; i--)
+                cnt[color[i]]--;
+
+            x++;
         }
 
-        int temp = r - l + 1 - times;
-        printf("%d\n", max(1, times - temp));
+        memset(cnt, 0, sizeof(cnt));
     }
 
+    for (int i = 1; i <= m; i++)
+        printf("%d\n", ans[i]);
     return 0;
 }
