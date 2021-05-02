@@ -61,7 +61,7 @@ int get_count(int x) { //x二进制表示中1的个数
     return res;
 }
 
-int ans[maxn];
+LL ans[maxn];
 
 int main() {
     n = readIn();
@@ -85,7 +85,7 @@ int main() {
         if (get_count(i) == k)
             nums.push_back(i);
 
-    for (int i = 1; i < n; i++) {
+    for (int i = 1; i <= n; i++) {
 
         for (int t : nums)
             g[w[i] ^ t]++;
