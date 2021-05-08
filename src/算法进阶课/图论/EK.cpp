@@ -39,7 +39,6 @@ bool bfs() {
 
     while (l < r) {
         int u = q[++l];
-        if (u == t) return true;
         for (int e = fir[u]; e; e = nxt[e])
             if (cap[e] > 0) {
                 int v = to[e];
@@ -48,6 +47,8 @@ bool bfs() {
                     q[++r] = v;
                     vis[v] = true;
                     pre[v] = e;
+
+                    if (v == t) return true;
                 }
             }
     }
