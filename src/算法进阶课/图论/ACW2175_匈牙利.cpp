@@ -41,7 +41,7 @@ int main() {
     }
     printf("%d\n", cnt);
 
-    for(int i = m + 1; i <= m + n; i++)
+    for(int i = 1; i <= n; i++)
         if(match[i]) {
             printf("%d %d\n", match[i], i);
         }
