@@ -22,7 +22,7 @@ struct SegmentTree {
     void pushdown(int o, int L, int R) {
         int M = L + R >> 1;
 
-        //ÏÈ³Ëºó¼Ó
+        //é”Ÿé¥ºä¹˜çŒ´æ‹·é”Ÿï¿½
         if (mulv[o] != 1) {
             mulv[lc] *= mulv[o];
             addv[lc] *= mulv[o];
@@ -111,16 +111,16 @@ int main() {
     T.build(1, 1, n);
     while (m--) {
         cin >> op;
-        if (op == 1) { //ÇóºÍ
+        if (op == 1) { //é”Ÿæ–¤æ‹·é”Ÿï¿½
             cin >> l >> r;
             cout << T.query(1, 1, n, l, r) << endl;
-        } else if (op == 2) { //Çø¼ä¼Ó
+        } else if (op == 2) { //é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
             cin >> l >> r >> x;
             T.update_add(1, 1, n, l, r, x);
-        } else if (op == 3) { //Çø¼ä³Ë
+        } else if (op == 3) { //é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
             cin >> l >> r >> x;
             T.update_mul(1, 1, n, l, r, x);
-        } else { //±éÀú
+        } else { //é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
             for (int i = 1; i <= n; i++)
                 cout << T.query(1, 1, n, i, i) << " ";
             cout << endl;
