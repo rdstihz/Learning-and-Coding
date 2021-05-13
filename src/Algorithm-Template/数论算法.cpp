@@ -100,26 +100,25 @@ int exgcd(int a, int b, int& x, int& y) {
 
 //Baby Step, Giant Step算法:
 //求解不定方程 a^x = b (mod p)
-
+//x = i * t - j  ( 1 <= i <= t,  0 <= j <= t ) (t ^ 2 >= p) 
+//注意i不能从0开始，否则会产生负数解
+//j必须取到t， 否则可能漏解 x = 0
+//a^(i*t) = b*a^j (mod p)
 LL bsgs(LL a, LL b, LL p) {
-    unordered_map<LL, LL> hash;
-    hash.clear();
-    LL t = sqrt(p - 1) + 1;
-
     b %= p;
+    unordered_map<LL, LL> hash;
+    LL t = sqrt(p) + 1;
     LL x = 1;
     for (LL j = 0; j < t; j++) {
         LL val = b * x % p;
         hash[val] = j;
         x = x * a % p;
     }
+    hash[b * x % p] = t;
     a = x;
-    x = 1;
-    for (LL i = 0; i <= t; i++) {
+    for (LL i = 1; i <= t; i++) {
         if (hash.count(x)) {
-            int r = i * t - hash[x];
-            if (r >= 0)
-                return r;
+            return i * t - hash[x];
         }
         x = x * a % p;
     }
