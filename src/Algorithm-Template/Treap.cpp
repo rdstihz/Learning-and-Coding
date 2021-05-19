@@ -3,121 +3,195 @@
 using namespace std;
 
 const int maxn = 100000 + 100;
-const int INF = 0x7fffffff;
+const int INF = 0x3f3f3f3f;
 
+//二叉搜索树 + 大根椎
 struct Treap {
-    int l, r;
-    int val, h;
-    int cnt, size;
-} node[maxn];
-int tot;
-int root;
 
-void maintain(int o) {
-    node[o].size = node[node[o].l].size + node[node[o].r].size + node[o].cnt;
-}
+    int lc[maxn], rc[maxn];
+    int val[maxn], rnd[maxn];
+    int size[maxn], cnt[maxn];
+    int tot, root;
 
-int newnode(int val) {
-    tot++;
-    node[tot].val = val;
-    node[tot].h = rand();
-    node[tot].cnt = node[tot].size = 1;
-    return tot;
-}
-
-void zig(int& p) { //右旋
-    int q = node[p].l;
-    node[p].l = node[q].r;
-    node[q].r = p;
-
-    p = q;
-    maintain(node[p].r);
-    maintain(p);
-}
-
-void zag(int& p) { //左旋
-    int q = node[p].r;
-    node[p].r = node[q].l;
-    node[q].l = p;
-
-    p = q;
-    maintain(node[p].l);
-    maintain(p);
-}
-
-void build() {
-    root = newnode(-INF);
-    node[root].r = newnode(INF);
-    maintain(root);
-}
-
-int readIn() {
-    int x = 0;
-    char c = getchar();
-    int flag = 1;
-    while (c < '0' || c > '9') {
-        if (c == '-') flag = -1;
-        c = getchar();
+    void maintain(int o) {
+        size[o] = cnt[o] + size[lc[o]] + size[rc[o]];
     }
-    while (c >= '0' && c <= '9') {
-        x = x * 10 + c - '0';
-        c = getchar();
-    }
-    return x * flag;
-}
 
-void insert(int& p, int val) {
-    if (p == 0) {
-        p = newnode(val);
-        return;
-    } else if (node[p].val == val) {
-        node[p].cnt++;
+    int newnode(int v) {
+        tot++;
+        val[tot] = v, rnd[tot] = rand();
+        size[tot] = cnt[tot] = 1;
+        return tot;
+    }
+
+    void zig(int& p) { //右旋
+        int q = lc[p];
+        lc[p] = rc[q];
+        rc[q] = p;
+        p = q;
+        maintain(rc[p]);
         maintain(p);
-        return;
     }
 
-    if (val < node[p].val) {
-        insert(node[p].l, val);
-        if (node[p].h < node[node[p].l].h)
-            zig(p);
-    } else {
-        insert(node[p].r, val);
-        if (node[p].h < node[node[p].r].h)
-            zag(p);
+    void zag(int& p) { //左旋
+        int q = rc[p];
+        rc[p] = lc[q];
+        lc[q] = p;
+        p = q;
+        maintain(lc[p]);
+        maintain(p);
     }
-    maintain(p);
-}
 
-void remove(int& p, int val) {
-    if (p == 0) return;
+    void build() {
+        root = newnode(-INF);
+        insert(root, INF);
+    }
 
-    if (node[p].val == val) {
-        if (node[p].cnt > 1) {
-            node[p].cnt--;
+    void insert(int& p, int v) {
+        if (!p) {
+            p = newnode(v);
             return;
         }
-        
+        if (val[p] == v) {
+            cnt[p]++;
+            size[p]++;
+            return;
+        }
 
-        return;
+        if (v < val[p]) {
+            insert(lc[p], v);
+            if (rnd[lc[p]] > rnd[p])
+                zig(p);
+        } else {
+            insert(rc[p], v);
+            if (rnd[rc[p]] > rnd[p])
+                zag(p);
+        }
+        maintain(p);
     }
-    if (val < node[p].val)
-        remove(node[p].l, val);
-    else
-        remove(node[p].r, val);
-    maintain(p);
+
+    void remove(int& p, int v) {
+        if (!p) return;
+        if (v == val[p]) {
+            if (cnt[p] > 1) {
+                cnt[p]--;
+                size[p]--;
+                return;
+            }
+            if (lc[p] && rc[p]) { //有两个儿子: 将p旋到下层
+                if (rnd[lc[p]] > rnd[rc[p]]) {
+                    zig(p);
+                    remove(rc[p], v);
+                } else {
+                    zag(p);
+                    remove(lc[p], v);
+                }
+            } else { //只有一个儿子（或没有儿子） ， 直接用儿子替代p
+                p = lc[p] | rc[p];
+            }
+            maintain(p);
+            return;
+        }
+
+        if (v < val[p]) {
+            remove(lc[p], v);
+        } else {
+            remove(rc[p], v);
+        }
+        maintain(p);
+    }
+
+    int getRankByVal(int& p, int v) {
+        if (!p) return 1;
+        if (v == val[p])
+            return size[lc[p]] + 1;
+        else if (v < val[p])
+            return getRankByVal(lc[p], v);
+        else
+            return getRankByVal(rc[p], v) + size[lc[p]] + cnt[p];
+    }
+
+    int getValByRank(int& p, int k) {
+        if (k <= size[lc[p]])
+            return getValByRank(lc[p], k);
+        else if (k <= size[lc[p]] + cnt[p])
+            return val[p];
+        else
+            return getValByRank(rc[p], k - size[lc[p]] - cnt[p]);
+    }
+
+    int getPre(int v) { //查询前驱
+        int cur = root;
+        int res = 1; // val[1] = -INF
+        while (cur) {
+            if (val[cur] < v && val[cur] > val[res]) res = cur;
+            cur = val[cur] < v ? rc[cur] : lc[cur];
+        }
+        return val[res];
+    }
+
+    int getNxt(int v) {
+        int cur = root;
+        int res = 2; // val[2] = INF
+        while (cur) {
+            if (val[cur] > v && val[cur] < val[res]) res = cur;
+            cur = val[cur] > v ? lc[cur] : rc[cur];
+        }
+        return val[res];
+    }
+
+    //------------
+    void print(int p) {
+        if (lc[p]) print(lc[p]);
+        //cout << "( " << p << " " << val[p] << " " << rnd[p] << " " << lc[p] << " " << rc[p] << " " << size[p] << " " << cnt[p] << " )" << endl;
+        cout << val[p] << " " << cnt[p] << endl;
+        if (rc[p]) print(rc[p]);
+    }
+    //------------
+
+} T;
+
+int main1() {
+    T.build();
+
+    int x;
+    for (int i = 1; i <= 5; i++) {
+        cin >> x;
+        T.insert(T.root, x);
+        T.print(T.root);
+        cout << T.size[T.root] << endl;
+        cout << "--------------" << endl;
+    }
+    for (int i = 1; i <= 5; i++) {
+        cin >> x;
+        T.remove(T.root, x);
+        T.print(T.root);
+        cout << T.size[T.root] << endl;
+        cout << "--------------" << endl;
+    }
+    return 0;
 }
 
 int main() {
-    int n = readIn();
-    build();
-
-    insert(root, 5);
-    insert(root, 6);
-    insert(root, 8);
-    insert(root, 6);
-    printf("%d\n", root);
-    for (int i = 0; i <= n; i++) {
-        printf("%d: %d %d %d %d %d %d\n", i, node[i].l, node[i].r, node[i].val, node[i].h, node[i].size, node[i].cnt);
+    int m;
+    cin >> m;
+    int op, x;
+    T.build();
+    while (m--) {
+        cin >> op >> x;
+        if (op == 1) {
+            T.insert(T.root, x);
+        } else if (op == 2) {
+            T.remove(T.root, x);
+        } else if (op == 3) {
+            cout << T.getRankByVal(T.root, x) - 1 << endl;
+        } else if (op == 4) {
+            cout << T.getValByRank(T.root, x + 1) << endl;
+        } else if (op == 5) {
+            cout << T.getPre(x) << endl;
+        } else if (op == 6) {
+            cout << T.getNxt(x) << endl;
+        }
     }
 
     return 0;
