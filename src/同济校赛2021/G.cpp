@@ -2,8 +2,8 @@
 
 using namespace std;
 
-const int maxn = 500;
-const int maxm = 30000 + 100;
+const int maxn = 510;
+const int maxm = 10000 + 100;
 const int INF = 0x3f3f3f3f;
 
 int from[maxm], to[maxm], cap[maxm], len[maxm];
@@ -71,20 +71,59 @@ void mcmf() {
     }
 }
 
+int cnt[maxn];
+
 int main() {
 
-    scanf("%d%d", &n, &m);
-    s = 1, t = n;
+    int T;
+    scanf("%d", &T);
 
-    int a, b, c, l;
-    tot = 1;
-    for (int i = 1; i <= m; i++) {
-        scanf("%d%d%d%d", &a, &b, &c, &l);
-        add(a, b, c, l);
+    while (T--) {
+
+        memset(fir, 0, sizeof(fir));
+        tot = 1;
+
+        scanf("%d%d", &n, &m);
+
+        int S = 0;
+        for (int i = 1; i <= n; i++) {
+            scanf("%d", cnt + i);
+            S += cnt[i];
+        }
+
+        int a, b, c;
+        for (int i = 1; i <= m; i++) {
+            scanf("%d%d%d", &a, &b, &c);
+            add(a, b, INF, c);
+            add(b, a, INF, c);
+        }
+
+        //S 不能整除 n
+        if (S % n) {
+            printf("-1\n");
+            continue;
+        }
+
+        int avg = S / n;
+        s = n + 1, t = n + 2;
+        int totflow = 0;
+        for (int i = 1; i <= n; i++) {
+            if (cnt[i] > avg) {
+                totflow += cnt[i] - avg;
+                add(s, i, cnt[i] - avg, 0);
+            } else if (cnt[i] < avg) {
+                add(i, t, avg - cnt[i], 0);
+            }
+        }
+
+        mcmf();
+        if (maxflow != totflow) {
+            printf("-1\n");
+            continue;
+        }
+
+        printf("%lld\n", cost);
     }
-
-    mcmf();
-    printf("%lld %lld\n", maxflow, cost);
 
     return 0;
 }
