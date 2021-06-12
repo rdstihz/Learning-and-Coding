@@ -106,7 +106,6 @@ int main() {
         printf("YES\n");
         for (int i = 1; i <= m; i++)
             printf("%d\n", cap[2 * i + 1] + low[i]);
-        printf("\n");
     } else {
         printf("NO\n");
     }
