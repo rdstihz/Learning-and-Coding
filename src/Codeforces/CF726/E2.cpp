@@ -44,11 +44,20 @@ void get_sa() {
 int main() {
     scanf("%d%d", &n, &k);
     scanf("%s", s + 1);
+    n++;
+    s[n] = 'z';
+    s[n + 1] = '\0';
     m = 122;
     get_sa();
 
+    // printf("\n%s\n", s + 1);
+    // for(int i = 1; i <= n; i++)
+    //     printf("%d ", sa[i]);
+    
+
     for (int i = 1; i <= n; i++)
         ord[sa[i]] = i;
+    
 
     int pos = n;
     for (int i = 2; i <= n; i++)
