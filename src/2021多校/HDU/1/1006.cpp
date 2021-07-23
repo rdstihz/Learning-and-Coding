@@ -45,7 +45,7 @@ int main() {
     int T;
     scanf("%d", &T);
     while (T--) {
-        memset(trie, 0, sizeof(trie));
+        //memset(trie, 0, sizeof(trie));
 
         tot = 0;
         root = ++tot;
@@ -68,6 +68,9 @@ int main() {
             printf("-1\n");
         else
             printf("%d %d\n", l + 1, l + ans);
+
+        for (int i = 0; i <= tot; i++)
+            trie[i][0] = trie[i][1] = 0;
     }
 
     return 0;

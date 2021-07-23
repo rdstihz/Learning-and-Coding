@@ -67,7 +67,7 @@ LL get_phi(LL P) {
 }
 
 LL mul(LL a, LL b, LL p) {
-    return (__int128)a * b % p;
+    return __int128(a) * b % p;
 }
 
 LL pow_mod(LL a, LL b, LL p) {
@@ -90,7 +90,8 @@ int main() {
     for (int i = 1; i <= 40000; i++) {
         Cp[i][0] = 1;
         for (int j = 1; j <= min(i, 30); j++) {
-            Cp[i][j] = (Cp[i - 1][j] + Cp[i - 1][j - 1]) % PP;
+            Cp[i][j] = Cp[i - 1][j] + Cp[i - 1][j - 1];
+            if (Cp[i][j] >= PP) Cp[i][j] -= PP;
         }
     }
 
@@ -109,7 +110,9 @@ int main() {
         for (int i = 1; i <= n; i++) {
             C[i][0] = 1;
             for (int j = 1; j <= min(i, k); j++) {
-                C[i][j] = (C[i - 1][j] + C[i - 1][j - 1]) % phi;
+                C[i][j] = C[i - 1][j] + C[i - 1][j - 1];
+                if (C[i][j] >= phi)
+                    C[i][j] -= phi;
             }
         }
 
