@@ -1,0 +1,11 @@
+1
+red
+8
+1 lock
+1 unlock
+1 blue
+1 unlock
+1 unlock
+1 lock
+1 yellow
+1 lock

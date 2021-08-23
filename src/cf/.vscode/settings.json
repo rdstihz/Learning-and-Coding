@@ -1,0 +1,6 @@
+{
+    "python.pythonPath": "/home/rdstihz/.conda/envs/python39/bin/python",
+    "files.associations": {
+        "tuple": "cpp"
+    }
+}
