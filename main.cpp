@@ -1,9 +1,10 @@
-
 #include <bits/stdc++.h>
 using namespace std;
-typedef pair<long long, long long> PLL;
-unordered_map<PLL, int> Q;
+
 
 int main() {
+    int a, b;
+    scanf("%d%d", &a, &b);
+    printf("%d\n", a + b);
     return 0;
 }
