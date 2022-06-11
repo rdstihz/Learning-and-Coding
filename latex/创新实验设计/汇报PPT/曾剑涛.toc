@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{题目和翻译}{2}{0}{1}
+\beamer@sectionintoc {2}{实验原理}{3}{0}{2}
+\beamer@sectionintoc {3}{实验内容}{8}{0}{3}
+\beamer@sectionintoc {4}{参考文献}{13}{0}{4}
