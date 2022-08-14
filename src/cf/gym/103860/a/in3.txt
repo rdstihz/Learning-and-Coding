@@ -1,0 +1,5 @@
+4 40
+echo a
+cp 2
+echo b
+cp 4

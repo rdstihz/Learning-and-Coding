@@ -1,0 +1,6 @@
+5 50
+echo a
+cp 2
+echo b
+cp 5
+cp 5
